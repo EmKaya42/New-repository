@@ -4,10 +4,7 @@ import { collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy } from "
 import { db } from "./firebase";
 import { useAuth } from "./AuthContext";
 import AuthModal from "./AuthModal";
-// Başına components yazmadan, direkt yanındaki dosyayı çağırıyoruz:
-import PWAInstallButton from "./PWAInstallButton";
-
-
+import InstallButton from "./InstallButton";
 
 const KATEGORILER = {
   gelir: ["Maaş", "Freelance", "Yatırım", "Eğitim", "Diğer"],
@@ -112,6 +109,15 @@ function BudgetApp() {
     setMiktar(""); setAciklama("");
   };
 
+  // İşlem Silme Fonksiyonu (Eklendi)
+  const islemSil = async (id) => {
+    try {
+      await deleteDoc(doc(db, "kullanicilar", kullanici.uid, "islemler", id));
+    } catch (error) {
+      console.error("İşlem silinirken hata oluştu:", error);
+    }
+  };
+
   return (
     <div style={{ maxWidth: "1150px", margin: "0 auto", padding: "10px" }}>
       
@@ -172,6 +178,11 @@ function BudgetApp() {
                 </div>
               </div>
             )}
+          </div>
+
+          {/* İndirme Butonu Entegrasyonu */}
+          <div style={{ transform: 'scale(0.85)', margin: '-10px 0' }}>
+            <InstallButton />
           </div>
 
           <button onClick={cikisYap} className="action-btn" style={{ padding: "10px 18px", borderRadius: "10px", background: "rgba(248,113,113,0.1)", color: "#f87171", border: "1px solid rgba(248,113,113,0.2)", cursor: "pointer", fontSize: "13px", fontWeight: "600" }}>Güvenli Çıkış</button>
@@ -344,7 +355,7 @@ function BudgetApp() {
                 </div>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "24px" }}>
-                <span style={{尊fontWeight: "700", fontSize: "17px", color: islem.tip === "gelir" ? "#10b981" : "#ef4444" }}>
+                <span style={{ fontWeight: "700", fontSize: "17px", color: islem.tip === "gelir" ? "#10b981" : "#ef4444" }}>
                   {islem.tip === "gelir" ? "+" : "-"} ₺{islem.miktar.toLocaleString()}
                 </span>
                 <button onClick={() => islemSil(islem.id)} className="action-btn" style={{ background: "rgba(239,68,68,0.05)", border: "1px solid rgba(239,68,68,0.1)", color: "#ef4444", cursor: "pointer", fontSize: "14px", padding: "8px 12px", borderRadius: "8px" }}>
@@ -407,8 +418,6 @@ export default function App() {
     </div>
   );
 }
-// ... Mevcut React ve ReactDOM importların ...
-// (Uygulamanın render edildiği root.render(...) kodunun hemen altına bunu ekle)
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
